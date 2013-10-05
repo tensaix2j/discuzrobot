@@ -56,41 +56,42 @@ def get_cari_rss()
 
 		forumitemset = 0
 
-		data.each { |line|
+		if data
+			data.each { |line|
 
 
-			if line[/item/] 
-				forumitemset = 1
+				if line[/item/] 
+					forumitemset = 1
 
-			elsif line[/title/] && forumitemset == 1
+				elsif line[/title/] && forumitemset == 1
+					
+					gbk_title = line.gsub("<title>","").gsub("</title>","").strip
+					utf_8_title = Iconv.conv('utf-8', 'gbk', gbk_title )
+					
+				elsif line[/link/] && forumitemset == 1
+
+					
+					link =  line.gsub("<link>","").gsub("</link>","").gsub("&amp;","&").strip
+					tid =  link.split("&").last.split("=").last
+					
+				elsif line[/description/] && forumitemset == 1
+
+					gbk_desc 	= line.gsub("<description>","").gsub("</description>","").strip
+					utf_8_desc 	= Iconv.conv('utf-8', 'gbk', gbk_desc )
 				
-				gbk_title = line.gsub("<title>","").gsub("</title>","").strip
-				utf_8_title = Iconv.conv('utf-8', 'gbk', gbk_title )
-				
-			elsif line[/link/] && forumitemset == 1
+				elsif line[/author/] && forumitemset == 1
 
+					gbk_author 		= line.gsub("<author>","").gsub("</author>","").strip
+					utf_8_author 	= Iconv.conv('utf-8', 'gbk', gbk_author )
 				
-				link =  line.gsub("<link>","").gsub("</link>","").gsub("&amp;","&").strip
-				tid =  link.split("&").last.split("=").last
+					if $tid_posted[tid] == nil	
+						$from_cari << [ utf_8_title , link, utf_8_desc , utf_8_author , tid ]	
+						$tid_posted[tid] = 1
+					end
 				
-			elsif line[/description/] && forumitemset == 1
-
-				gbk_desc 	= line.gsub("<description>","").gsub("</description>","").strip
-				utf_8_desc 	= Iconv.conv('utf-8', 'gbk', gbk_desc )
-			
-			elsif line[/author/] && forumitemset == 1
-
-				gbk_author 		= line.gsub("<author>","").gsub("</author>","").strip
-				utf_8_author 	= Iconv.conv('utf-8', 'gbk', gbk_author )
-			
-				if $tid_posted[tid] == nil	
-					$from_cari << [ utf_8_title , link, utf_8_desc , utf_8_author , tid ]	
-					$tid_posted[tid] = 1
 				end
-			
-			end
-		}
-
+			}
+		end	
 	}
 
 	puts "#{ $from_cari.length } new topics\n"
