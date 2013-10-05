@@ -190,22 +190,23 @@ def forward_to_forum
 	formhashfound = 0
 	formhash = ""
 
-	data.each { |line|
-		if line[/formhash/] && line[/input\ type/]
+	if data
+		data.each { |line|
+			if line[/formhash/] && line[/input\ type/]
 
-			
-			line.split(" ").each { |token|
-				if token[/value/] 
-					
-					formhash = token.split("=")[1].gsub("\"","")
-					formhashfound = 1
-				end
-			}
+				
+				line.split(" ").each { |token|
+					if token[/value/] 
+						
+						formhash = token.split("=")[1].gsub("\"","")
+						formhashfound = 1
+					end
+				}
 
-			break if formhashfound == 1
-		end
-	}
-
+				break if formhashfound == 1
+			end
+		}
+	end
 
 	if formhashfound == 1
 	
