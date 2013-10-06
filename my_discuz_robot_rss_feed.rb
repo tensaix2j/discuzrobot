@@ -136,7 +136,7 @@ def forward_to_forum
 	http 		= Net::HTTP.new(host, 80)
 	forum_root = "/"
 	username 	= "discuzrobot"
-	password 	= "discuzrobot123"
+	password 	= "discuzrobot"
 	fid 		= 50
 	
 
