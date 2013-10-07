@@ -48,8 +48,14 @@ def get_zaobao_rss()
 	rss = SimpleRSS.parse open('http://zaobao.feedsportal.com/c/34003/f/616933/index.rss')
 	rss.entries.each { | entry | 
 
+		
+		new_entry = {}
+		new_entry[:title] = entry.title
+		new_entry[:link ] = entry.link
+		new_entry[:description] = entry.description.split("&lt;")[0]
+
 		if $link_posted[ entry.link ] == nil
-			$news_buffer << entry
+			$news_buffer << new_entry
 		end
 
 	}
@@ -67,6 +73,16 @@ def save_posted_link( )
 		fp.puts( link )
 	}
 	fp.close()	
+end
+
+#----
+def save_single_link( link ) 
+
+	data_file = "posted_link.dat"
+	fp = File.open(data_file,"a")
+	fp.puts( link )
+	fp.close()	
+
 end
 
 #----
@@ -96,7 +112,7 @@ def forward_to_forum
 	#http 		= Net::HTTP.new(host, 80)
 	#forum_root = "/"
 	#username 	= "discuzrobot"
-	#password 	= "discuzrobot"
+	#password 	= "discuzrobot123"
 	#fid 		= 50
 
 
@@ -185,6 +201,7 @@ def forward_to_forum
 
 			$news_buffer.each { |entry|
 
+
 				data = {}
 				data[:mod] 			= "post" 
 				data[:action] 		= "newthread" 
@@ -192,8 +209,8 @@ def forward_to_forum
 				data[:topicsubmit] 	= "yes" 
 				data[:infloat] 		= "yes"
 				data[:handlekey] 	= "fastnewpost" 
-				data[:subject] 		= CGI::escape( entry.title )
-				data[:message] 		= CGI::escape( "#{ entry.desc} \n [url=#{ entry.link}]#{ entry.link}[/url]\n by #{ entry.author && entry.author}" )
+				data[:subject] 		= entry[:title]
+				data[:message] 		= "#{ entry[:description]}\n\n[url=#{ entry[:link] }]Source: Zaobao[/url]" 
 				data[:formhash] 	= formhash
 				data[:usesig] 		= 1 
 				data[:posttime] 	= Time.now().to_i
@@ -203,8 +220,11 @@ def forward_to_forum
 				
 				resp, data = http.post(new_topic_path, data_str, headers)
 
-				$link_posted[ entry.link ] = 1
+				save_single_link( entry[:link] ) 
 				
+				puts "#{ entry[:title] } posted"
+
+
 				sleep 15
 
 					
@@ -221,7 +241,6 @@ end
 load_posted_link() 
 get_zaobao_rss()
 forward_to_forum()
-save_posted_link()
 
 
 
