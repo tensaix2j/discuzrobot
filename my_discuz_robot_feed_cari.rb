@@ -99,13 +99,21 @@ end
 #-----------
 def forward_to_forum
 
-	host 		= "cari.com.sg"
-	http 		= Net::HTTP.new(host, 80)
-	forum_root = "/"
-	username 	= "discuzrobot"
-	password 	= "discuzrobot"
-	fid 		= 50
+	#host 		= "cari.com.sg"
+	#http 		= Net::HTTP.new(host, 80)
+	#forum_root = "/"
+	#username 	= "discuzrobot"
+	#password 	= "discuzrobot"
+	#fid 		= 50
 
+
+	host 		= "popsg.com"
+	http 		= Net::HTTP.new(host, 80)
+	forum_root = "/forum2/upload"
+	username 	= "tester123"
+	password 	= "tester123"
+	fid 		= 2
+		
 
 	# Step 1, Login
 	login_path = "#{forum_root}/member.php"

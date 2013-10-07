@@ -41,23 +41,15 @@ $news_buffer = []
 $link_posted = {}
 
 #----------------
-def get_cari_rss()
+def get_zaobao_rss()
 
 	$news_buffer = []
 
-	rss = SimpleRSS.parse open('http://cforum.cari.com.my/forum.php?mod=rss&fid=159')
+	rss = SimpleRSS.parse open('http://zaobao.feedsportal.com/c/34003/f/616933/index.rss')
 	rss.entries.each { | entry | 
 
 		if $link_posted[ entry.link ] == nil
-
-			utf_8_entry = {}
-
-			utf_8_entry[:title] 		= Iconv.conv('utf-8', 'gbk', entry.title )
-			utf_8_entry[:description] 	= Iconv.conv('utf-8', 'gbk', entry.description )
-			utf_8_entry[:author] 		= Iconv.conv('utf-8', 'gbk', entry.author )
-			utf_8_entry[:link]			= entry.link
-
-			$news_buffer << utf_8_entry
+			$news_buffer << entry
 		end
 
 	}
@@ -92,6 +84,7 @@ def load_posted_link()
 		puts "No data file."
 	end
 
+	
 
 end
 
@@ -99,13 +92,21 @@ end
 #-----------
 def forward_to_forum
 
-	host 		= "cari.com.sg"
-	http 		= Net::HTTP.new(host, 80)
-	forum_root = "/"
-	username 	= "discuzrobot"
-	password 	= "discuzrobot"
-	fid 		= 50
+	#host 		= "cari.com.sg"
+	#http 		= Net::HTTP.new(host, 80)
+	#forum_root = "/"
+	#username 	= "discuzrobot"
+	#password 	= "discuzrobot"
+	#fid 		= 50
 
+
+	host 		= "popsg.com"
+	http 		= Net::HTTP.new(host, 80)
+	forum_root = "/forum2/upload"
+	username 	= "tester123"
+	password 	= "tester123"
+	fid 		= 2
+		
 
 	# Step 1, Login
 	login_path = "#{forum_root}/member.php"
@@ -184,8 +185,6 @@ def forward_to_forum
 
 			$news_buffer.each { |entry|
 
-				puts entry[:title]
-
 				data = {}
 				data[:mod] 			= "post" 
 				data[:action] 		= "newthread" 
@@ -193,8 +192,8 @@ def forward_to_forum
 				data[:topicsubmit] 	= "yes" 
 				data[:infloat] 		= "yes"
 				data[:handlekey] 	= "fastnewpost" 
-				data[:subject] 		= CGI::escape( entry[:title] )
-				data[:message] 		= CGI::escape( "#{ entry[:description] } \n [url=#{ entry[:link] }]#{ entry[:link] }[/url]\n by #{ entry[:author] && entry[:author] }" )
+				data[:subject] 		= CGI::escape( entry.title )
+				data[:message] 		= CGI::escape( "#{ entry.desc} \n [url=#{ entry.link}]#{ entry.link}[/url]\n by #{ entry.author && entry.author}" )
 				data[:formhash] 	= formhash
 				data[:usesig] 		= 1 
 				data[:posttime] 	= Time.now().to_i
@@ -204,8 +203,8 @@ def forward_to_forum
 				
 				resp, data = http.post(new_topic_path, data_str, headers)
 
-				$link_posted[ entry[:link] ] = 1
-
+				$link_posted[ entry.link ] = 1
+				
 				sleep 15
 
 					
@@ -220,7 +219,7 @@ end
 
 
 load_posted_link() 
-get_cari_rss()
+get_zaobao_rss()
 forward_to_forum()
 save_posted_link()
 
