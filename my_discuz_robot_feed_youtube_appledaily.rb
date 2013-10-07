@@ -41,19 +41,21 @@ $news_buffer = []
 $link_posted = {}
 
 #----------------
-def get_zaobao_rss()
+def get_rss()
 
 	$news_buffer = []
 
-	rss = SimpleRSS.parse open('http://zaobao.feedsportal.com/c/34003/f/616933/index.rss')
+	rss = SimpleRSS.parse open('http://gdata.youtube.com/feeds/api/videos?orderby=updated&vq=%E5%8B%95%E6%96%B0%E8%81%9E&max-results=15')
 	rss.entries.each { | entry | 
 
 		
+
 		new_entry = {}
 		new_entry[:title] = entry.title
-		new_entry[:link ] = entry.link
-		new_entry[:description] = entry.description.split("&lt;")[0]
+		new_entry[:vid ] = entry.link.split("?v=")[1].split("&amp;")[0]
+		new_entry[:link] = entry.link
 
+		
 		if $link_posted[ entry.link ] == nil
 			$news_buffer << new_entry
 		end
@@ -108,6 +110,14 @@ end
 #-----------
 def forward_to_forum
 
+	#host 		= "cforum.cari.com.my"
+	#http 		= Net::HTTP.new(host, 80)
+	#forum_root = "/"
+	#username 	= "discuzrobot"
+	#password 	= "discuzrobot123"
+	#fid 		= 159
+
+
 	host 		= "cari.com.sg"
 	http 		= Net::HTTP.new(host, 80)
 	forum_root = "/"
@@ -122,7 +132,7 @@ def forward_to_forum
 	#username 	= "tester123"
 	#password 	= "tester123"
 	#fid 		= 2
-		
+			
 
 	# Step 1, Login
 	login_path = "#{forum_root}/member.php"
@@ -210,7 +220,7 @@ def forward_to_forum
 				data[:infloat] 		= "yes"
 				data[:handlekey] 	= "fastnewpost" 
 				data[:subject] 		= entry[:title]
-				data[:message] 		= "#{ entry[:description]}\n\n[url=#{ entry[:link] }]Source: Zaobao[/url]" 
+				data[:message] 		= "[youtube]#{ entry[:vid] }[/youtube]" 
 				data[:formhash] 	= formhash
 				data[:usesig] 		= 1 
 				data[:posttime] 	= Time.now().to_i
@@ -239,7 +249,7 @@ end
 
 
 load_posted_link() 
-get_zaobao_rss()
+get_rss()
 forward_to_forum()
 
 
